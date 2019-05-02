@@ -35,13 +35,31 @@ def register(username, password, email):
     print("注册信息",re.text)
 
 
+def add_lodgeInfo(info_dict):
+    url = 'http://127.0.0.1:8000/api_add_lodgeinfo/'
+    json.dumps(info_dict)
+    re = requests.post(url,json=info_dict)
+    print("添加房源", re.text)
+
+
+
+def add_order(order_info):
+    url = 'http://127.0.0.1:8000/api_add_order/'
+    json.dumps(order_info)
+    re = requests.post(url, json=order_info)
+    print(re.text)
+
+
+
+
+
 
 if __name__ == '__main__':
-    username = "luoshiling17",
-    password = "admin12345",
-    email = "15901304866@163.com"
-    register(username, password, email)
-    login(username, password)
+    # username = "luoshiling18",
+    # password = "admin12345",
+    # email = "15901304866@163.com"
+    # register(username, password, email)
+    # login(username, password)
     # info_dict = {"dayprice":3,
     #              "estate":"valid",
     #              "minday":1,
@@ -52,6 +70,13 @@ if __name__ == '__main__':
     #              "image_md5":"sfdgwet4husf98fwiuhfsjkdhwh"
     #             }
     # add_lodgeInfo(info_dict)
+    order_info = {
+        "luid":1,
+        "guestnum":2,
+        "checkinday":"2019-01-03",
+        "checkoutday":"2019-01-04"
+    }
+    add_order(order_info)
 
 
 
