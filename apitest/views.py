@@ -8,7 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 
 from django.contrib.auth.hashers import check_password, make_password
-
+import sys
+import datetime
 
 # api_demo
 @csrf_exempt
@@ -105,20 +106,79 @@ def register(request):
         })
 
 
+# 数据库检查字段
+def is_fields_error(_model, fields, ex_fields):
+    from django.db import models
+    """
+    @note 检查相应的_model里是否含有params所有key，若为否，则返回第一个遇到的不在_model里的key和False
+    否则，返回为空True与空
+    :param _model: fields:待检查字段  ex_fields:不在检查范围内的字段，比如外键
+    :param params:
+    :return: True,'' / False, key
+    """
+    if ex_fields:
+        for i in ex_fields:
+            if i in fields:
+                fields.remove(i)
 
-def add_lodgeInfo(info_dict):
+    if not (issubclass(_model, models.Model) and isinstance(fields, (list, tuple))):
+        return False, u'参数有误'
+
+    all_fields = list(_model._meta.get_fields())
+    print(all_fields)
+    for key in fields:
+        if key not in all_fields:
+            return False, key
+    return True, ''
+
+
+# 添加房源接口
+@csrf_exempt
+@api_view(http_method_names=['POST'])
+@permission_classes((permissions.AllowAny,))
+def add_lodgeinfo(request):
+    info_dict = json.loads(request.body)
+    # _flag, func_r = is_fields_error(lodgeunitinfo, list(info_dict.keys()), ex_fields=['id','create_time','update_time'])
+    # if not _flag:
+    #     print("触发", func_r)
+    # else:
+    #     print("没触发", func_r)
     try:
         lodgeunitinfo.objects.create(**info_dict)
-        return HttpResponse({"status_code":200,"msg":"房源添加成功"})
+        return Response({"status_code": 200, "msg": "房源添加成功"})
     except Exception:
-        print({"status_code":400,"msg":"房源添加失败"})
+        exception_info = sys.exc_info()
+        return Response({"status_code": 400, "msg":exception_info[0] + ":" + exception_info[1]})
+
+
+
 
 # 订单接口
-# @csrf_exempt
-# @api_view(http_method_names=['POST'])
-# @permission_classes((permissions.AllowAny,))
-# def order(request):
-#     data = json.loads(request.body)
-#
-#     #  房源存在校验
-#     try:
+@csrf_exempt
+@api_view(http_method_names=['POST'])
+@permission_classes((permissions.AllowAny,))
+def create_order(request):
+    data = json.loads(request.body)
+    #  房源存在校验
+    luid = data['luid']
+    daynum = datetime.datetime.strptime(data['checkoutday'],'%Y-%m-%d') - datetime.datetime.strptime(data['checkinday'],'%Y-%m-%d')
+    id_list = []
+    for i in lodgeunitinfo.objects.values('id'):
+        id_list.append(i['id'])
+    if luid not in id_list:
+        return Response({"status_code": 400, "msg": luid + "不存在"})
+    elif daynum.days < 1:
+        return Response({"status_code": 400, "msg": "入住时间不能晚于离开时间"})
+    else:
+        lodgeinfo = lodgeunitinfo.objects.filter(id=str(luid))
+        # for i in lodgeunitinfo:
+        #     if i["id"] == luid:
+        #         dayprice = i['dayprice']
+        dayprice = 0
+        for i in lodgeinfo:
+            dayprice = i.dayprice
+        totalprice = int(daynum.days) * dayprice
+        data["totalprice"] = totalprice
+        order.objects.create(**data)
+        return Response({"status_code": 200, "msg": "创建订单成功"})
+

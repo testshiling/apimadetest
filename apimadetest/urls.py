@@ -23,5 +23,7 @@ urlpatterns = [
     url(r'^api_login_post/', login_post),
     url(r'^api_login_get', login_get),
     url(r'^api_register/', register),
+    url(r'^api_add_lodgeinfo/', add_lodgeinfo),
+    url(r'^api_add_order/', create_order),
 
 ]

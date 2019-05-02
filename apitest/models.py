@@ -13,10 +13,11 @@ class order(models.Model):
     guestnum = models.IntegerField(default=1, null=False)
     checkinday = models.CharField(max_length=20, null=False)
     checkoutday = models.CharField(max_length=20, null=False)
-    create_time = models.DateTimeField()
-    update_time = models.DateTimeField()
+    create_time = models.DateTimeField(auto_now=True)
+    update_time = models.DateTimeField(auto_now=True)
     remarks = models.CharField(max_length=500)
     luid = models.IntegerField(null=False)
+    #luid = models.ForeignKey(lodgeunitinfo,related_name='id',null=False,on_delete=models.DO_NOTHING)
 
 
 class lodgeunitinfo(models.Model):
@@ -30,8 +31,8 @@ class lodgeunitinfo(models.Model):
     minday = models.IntegerField(null=False)
     maxday = models.IntegerField(null=False)
     tel = models.CharField(max_length=11,null=False)
-    create_time = models.DateTimeField()
-    update_time = models.DateTimeField()
+    create_time = models.DateTimeField(auto_now=True)
+    update_time = models.DateTimeField(auto_now=True)
     remarks = models.CharField(max_length=500)
     address_id = models.CharField(max_length=50, null=False)
     image_md5 = models.CharField(max_length=100, null=False)
