@@ -10,6 +10,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import check_password, make_password
 import sys
 import datetime
+import threading
+import time
+
 
 # api_demo
 @csrf_exempt
@@ -34,7 +37,6 @@ def api_demo(request):
 @permission_classes((permissions.AllowAny,))
 def login_post(request):
     data = json.loads(request.body)
-
     try:
         user = User.objects.get(username=data['username'])
     except User.DoesNotExist:
@@ -86,6 +88,16 @@ def login_get(request):
 @api_view(http_method_names=['POST'])
 @permission_classes((permissions.AllowAny,))
 def register(request):
+    """
+    参数示例：
+    data = {
+        'username': "luoshiling18",
+        'password': admin12345,
+        'email': "15901304866@163.com",
+    }
+    :param request:
+    :return:
+    """
     data = json.loads(request.body)
     if (data['username'] == ""
             or data['password'] == ""
@@ -106,7 +118,7 @@ def register(request):
         })
 
 
-# 数据库检查字段
+# 数据库检查字段  目前没用
 def is_fields_error(_model, fields, ex_fields):
     from django.db import models
     """
@@ -137,6 +149,20 @@ def is_fields_error(_model, fields, ex_fields):
 @api_view(http_method_names=['POST'])
 @permission_classes((permissions.AllowAny,))
 def add_lodgeinfo(request):
+    """
+    参数示例：
+    info_dict = {"dayprice":3,
+    #              "estate":"valid",
+    #              "minday":1,
+    #              "maxday":2,
+    #              "tel":"15901304864",
+    #              "remarks":"",
+    #              "address_id":"124253424342",
+    #              "image_md5":"sfdgwet4husf98fwiuhfsjkdhwh"
+    #             }
+    :param request:
+    :return:
+    """
     info_dict = json.loads(request.body)
     # _flag, func_r = is_fields_error(lodgeunitinfo, list(info_dict.keys()), ex_fields=['id','create_time','update_time'])
     # if not _flag:
@@ -151,17 +177,26 @@ def add_lodgeinfo(request):
         return Response({"status_code": 400, "msg":exception_info[0] + ":" + exception_info[1]})
 
 
-
-
 # 订单接口
 @csrf_exempt
 @api_view(http_method_names=['POST'])
 @permission_classes((permissions.AllowAny,))
 def create_order(request):
+    """
+    参数示例：
+    order_info = {
+    #     "luid":1,
+    #     "guestnum":2,
+    #     "checkinday":"2019-01-03",
+    #     "checkoutday":"2019-01-04"
+    # }
+    :param request:
+    :return:
+    """
     data = json.loads(request.body)
     #  房源存在校验
     luid = data['luid']
-    daynum = datetime.datetime.strptime(data['checkoutday'],'%Y-%m-%d') - datetime.datetime.strptime(data['checkinday'],'%Y-%m-%d')
+    daynum = datetime.datetime.strptime(data['checkoutday'], '%Y-%m-%d') - datetime.datetime.strptime(data['checkinday'],'%Y-%m-%d')
     id_list = []
     for i in lodgeunitinfo.objects.values('id'):
         id_list.append(i['id'])
@@ -171,14 +206,101 @@ def create_order(request):
         return Response({"status_code": 400, "msg": "入住时间不能晚于离开时间"})
     else:
         lodgeinfo = lodgeunitinfo.objects.filter(id=str(luid))
-        # for i in lodgeunitinfo:
-        #     if i["id"] == luid:
-        #         dayprice = i['dayprice']
         dayprice = 0
         for i in lodgeinfo:
             dayprice = i.dayprice
         totalprice = int(daynum.days) * dayprice
+        print("日价", dayprice, "天数", daynum.days)
         data["totalprice"] = totalprice
         order.objects.create(**data)
         return Response({"status_code": 200, "msg": "创建订单成功"})
+
+
+# 支付第三方接口
+@csrf_exempt
+@api_view(http_method_names=['POST'])
+@permission_classes((permissions.AllowAny,))
+def others_pay_order(request):
+    data = json.loads(request.body)
+    order_id = data['order_id']
+    totalprice = data['totalprice']
+    other_order_info = others_order.objects.filter(order_id=str(order_id))
+    if other_order_info:
+        pass
+    else:
+        others_order.objects.create(order_id=order_id)
+    # 下面这步在实际中其实是不对，应该是从第三方库中查
+    try:
+        orderinfo = order.objects.filter(id=str(order_id))
+    except Exception:
+        return Response({"status_code": 400, "msg": "订单不存在"})
+    for i in orderinfo:
+        if totalprice == i.totalprice:
+            if i.estate == 'valid':
+                print(1)
+                coo = threading.Thread(target=update_others_order, kwargs=({"order_id": order_id, "totalprice": totalprice, "estate": "yes"}))
+                print(2)
+                coo.start()
+                print(3)
+                return Response({"status_code": 200, "msg": "支付成功"})
+            else:
+                return Response({"status_code": 400, "msg": "订单状态不正确"})
+        else:
+            return Response({"status_code": 400, "msg": "订单总价不正确"})
+
+
+# 起一个进程去后台更新数据库
+def update_others_order(**others_order_update_info):
+    check_dict = isinstance(others_order_update_info, dict)
+    print(others_order_update_info)
+    print(4)
+    if check_dict:
+        print(5)
+        others_order.objects.filter(order_id=others_order_update_info['order_id']).\
+            update(**others_order_update_info)
+        pass
+    else:
+        return Response({"status_code": 400, "msg": "订单更新失败"})
+    print("更新内容：" + str(others_order_update_info))
+
+
+# 支付接口
+@csrf_exempt
+@api_view(http_method_names=['POST'])
+@permission_classes((permissions.AllowAny,))
+def pay_order(request):
+    """
+    参数示例：
+    pay_order_info = {
+        "order_id": 1,
+        "luid": 1
+    }
+    :param request:
+    :return:
+    """
+    data = json.loads(request.body)
+    #  订单参数检查
+    order_id = data['order_id']
+    luid = data['luid']
+    try:
+        orderinfo = order.objects.filter(id=str(order_id))
+    except Exception:
+        return Response({"status_code": 400, "msg": "订单不存在"})
+    try:
+        luinfo = lodgeunitinfo.objects.filter(id=str(luid))
+    except Exception:
+        return Response({"status_code": 400, "msg": "房源不存在"})
+    for i in orderinfo:
+        if luid == i.luid:
+            if i.estate == 'valid':
+                for j in luinfo:
+                    if j.estate == 'valid':
+                        return Response({"status_code": 200, "msg": "这时要调第三方支付接口"})
+                    else:
+                        return Response({"status_code": 400, "msg": "房源已下线或已被预订"})
+            else:
+                return Response({"status_code": 400, "msg": "订单已失效"})
+        else:
+            return Response({"status_code": 400, "msg": "订单与房源不匹配"})
+
 

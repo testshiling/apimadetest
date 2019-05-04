@@ -22,10 +22,12 @@ DATABASES = {
 
 
 5、运行步骤：
-cd apimadetest/
-python manage.py makemigrations
-python manage.py migrate    #准备数据库环境
-python manage.py createsuperuser   #创建超级用户,方便管理
-python manage.py runserver   #启动项目
+A、 cd apimadetest/
+B、 python manage.py makemigrations
+C、 python manage.py migrate    #准备数据库环境
+D、 python manage.py createsuperuser   #创建超级用户,方便管理
+E、 python manage.py runserver   #启动项目
 
 6、apitest/test/test.py 中有一些测试脚本可以运行试试
+
+
