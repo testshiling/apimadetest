@@ -64,11 +64,11 @@ def others_pay_order(others_pay_order_info):
 
 
 if __name__ == '__main__':
-    username = "luoshiling19",
-    password = "admin12345",
-    email = "15901304866@163.com"
-    register(username, password, email)
-    login(username, password)
+    # username = "luoshiling19",
+    # password = "admin12345",
+    # email = "15901304866@163.com"
+    # register(username, password, email)
+    # login(username, password)
     # info_dict = {"dayprice":3,
     #              "estate":"valid",
     #              "minday":1,
@@ -90,12 +90,12 @@ if __name__ == '__main__':
     #     "order_id": 1,
     #     "luid": 1
     # }
-    # pay_order(pay_order_info)
-    # others_pay_order_info = {
-    #      "order_id": 1,
-    #      "totalprice": 3
-    # }
-    # others_pay_order(others_pay_order_info)
+    #pay_order(pay_order_info)
+    others_pay_order_info = {
+         "order_id": 1,
+         "totalprice": 3
+    }
+    others_pay_order(others_pay_order_info)
 
 
 
