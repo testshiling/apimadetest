@@ -23,12 +23,10 @@ def login1():
 
 def register(username, password, email):
     url = 'http://127.0.0.1:8000/api_register/'
-
     data = {
         'username': username,
         'password': password,
         'email': email,
-        'passwdconfirm': password
     }
     json.dumps(data)
     re = requests.post(url, json=data)
@@ -49,17 +47,28 @@ def add_order(order_info):
     re = requests.post(url, json=order_info)
     print(re.text)
 
+def pay_order(pay_order_info):
+    url = 'http://127.0.0.1:8000/api_pay_order/'
+    json.dumps(pay_order_info)
+    re = requests.post(url, json=pay_order_info)
+    print(re.text)
+
+def others_pay_order(others_pay_order_info):
+    url = 'http://127.0.0.1:8000/api_others_pay_order/'
+    json.dumps(others_pay_order_info)
+    re = requests.post(url, json=others_pay_order_info)
+    print(re.text)
 
 
 
 
 
 if __name__ == '__main__':
-    # username = "luoshiling18",
-    # password = "admin12345",
-    # email = "15901304866@163.com"
-    # register(username, password, email)
-    # login(username, password)
+    username = "luoshiling19",
+    password = "admin12345",
+    email = "15901304866@163.com"
+    register(username, password, email)
+    login(username, password)
     # info_dict = {"dayprice":3,
     #              "estate":"valid",
     #              "minday":1,
@@ -70,13 +79,24 @@ if __name__ == '__main__':
     #              "image_md5":"sfdgwet4husf98fwiuhfsjkdhwh"
     #             }
     # add_lodgeInfo(info_dict)
-    order_info = {
-        "luid":1,
-        "guestnum":2,
-        "checkinday":"2019-01-03",
-        "checkoutday":"2019-01-04"
-    }
-    add_order(order_info)
+    # order_info = {
+    #     "luid":1,
+    #     "guestnum":2,
+    #     "checkinday":"2019-01-03",
+    #     "checkoutday":"2019-01-04"
+    # }
+    # add_order(order_info)
+    # pay_order_info = {
+    #     "order_id": 1,
+    #     "luid": 1
+    # }
+    # pay_order(pay_order_info)
+    # others_pay_order_info = {
+    #      "order_id": 1,
+    #      "totalprice": 3
+    # }
+    # others_pay_order(others_pay_order_info)
+
 
 
 

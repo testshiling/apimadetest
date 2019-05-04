@@ -35,5 +35,16 @@ class order(models.Model):
     remarks = models.CharField(max_length=500)
     luid = models.IntegerField(null=False)
 
-
+class others_order(models.Model):
+    id = models.AutoField(primary_key=True)
+    totalprice = models.IntegerField(default=0, null=False)
+    choice = {
+        ('yes', 'yes'),
+        ('no', 'no')
+    }
+    estate = models.CharField(choices=choice, default='no',max_length=10, null=False)
+    create_time = models.DateTimeField(auto_now=True)
+    update_time = models.DateTimeField(auto_now=True)
+    remarks = models.CharField(max_length=500)
+    order_id = models.IntegerField(null=False)
 

@@ -25,5 +25,7 @@ urlpatterns = [
     url(r'^api_register/', register),
     url(r'^api_add_lodgeinfo/', add_lodgeinfo),
     url(r'^api_add_order/', create_order),
+    url(r'^api_pay_order/', pay_order),
+    url(r'^api_others_pay_order/', others_pay_order),
 
 ]
