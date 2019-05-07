@@ -88,7 +88,7 @@ if __name__ == '__main__':
     }
     add_order(order_info)
     pay_order_info = {
-        "order_id": 17,
+        "order_id": 1,
         "luid": 1
     }
     pay_order(pay_order_info)
