@@ -11,7 +11,7 @@ from django.contrib.auth.hashers import check_password, make_password
 import sys
 import datetime
 import threading
-import time
+import requests
 
 
 # api_demo
@@ -102,7 +102,7 @@ def register(request):
     if (data['username'] == ""
             or data['password'] == ""
             or data['email'] == ""
-            or data['passwdconfirm'] == ""):
+            ):
         return Response({
             "status_code": 400,
             'msg': "信息错误"
@@ -210,10 +210,24 @@ def create_order(request):
         for i in lodgeinfo:
             dayprice = i.dayprice
         totalprice = int(daynum.days) * dayprice
-        print("日价", dayprice, "天数", daynum.days)
+        #print("日价", dayprice, "天数", daynum.days)
         data["totalprice"] = totalprice
         order.objects.create(**data)
         return Response({"status_code": 200, "msg": "创建订单成功"})
+
+
+# 支付回调接口--示例
+@csrf_exempt
+@api_view(http_method_names=['POST'])
+@permission_classes((permissions.AllowAny,))
+def payback_order(request):
+    data = json.loads(request.body)
+    order_id = data['order_id']
+    try:
+        order.objects.filter(id=order_id).update(estate='deleted')
+    except Exception:
+        return Response({"status_code": 400, "msg": "订单回调更新失败"})
+    return Response({"status_code": 200, "msg": "支付成功"})
 
 
 # 支付第三方接口
@@ -237,11 +251,10 @@ def others_pay_order(request):
     for i in orderinfo:
         if totalprice == i.totalprice:
             if i.estate == 'valid':
-                print(1)
-                coo = threading.Thread(target=update_others_order, kwargs=({"order_id": order_id, "totalprice": totalprice, "estate": "yes"}))
-                print(2)
-                coo.start()
-                print(3)
+                coo_others = threading.Thread(target=update_others_order, kwargs=({"order_id": order_id, "totalprice": totalprice, "estate": "yes"}))
+                coo_others.start()
+                coo_back = threading.Thread(target=payback_order_true, kwargs=({"order_id": order_id}))
+                coo_back.start()
                 return Response({"status_code": 200, "msg": "支付成功"})
             else:
                 return Response({"status_code": 400, "msg": "订单状态不正确"})
@@ -249,19 +262,28 @@ def others_pay_order(request):
             return Response({"status_code": 400, "msg": "订单总价不正确"})
 
 
+# 支付回调接口--第三方用
+def payback_order_true(**data):
+    order_id = data['order_id']
+    try:
+        order.objects.filter(id=order_id).update(estate='deleted')
+    except Exception:
+        return Response({"status_code": 400, "msg": "订单回调更新失败"})
+
+
 # 起一个进程去后台更新数据库
-def update_others_order(**others_order_update_info):
-    check_dict = isinstance(others_order_update_info, dict)
-    print(others_order_update_info)
-    print(4)
+def update_others_order(**data):
+    check_dict = isinstance(data, dict)
     if check_dict:
-        print(5)
-        others_order.objects.filter(order_id=others_order_update_info['order_id']).\
-            update(**others_order_update_info)
+        others_order.objects.filter(order_id=data['order_id']).\
+            update(**data)
         pass
     else:
         return Response({"status_code": 400, "msg": "订单更新失败"})
-    print("更新内容：" + str(others_order_update_info))
+
+    print("更新内容：" + str(data))
+
+
 
 
 # 支付接口
