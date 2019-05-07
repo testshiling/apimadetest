@@ -23,8 +23,10 @@ class order(models.Model):
     id = models.AutoField(primary_key=True)
     totalprice = models.IntegerField(default=0,null=False)
     choice = {
-        ('deleted','deleted'),
-        ('valid','valid')
+        ('done', 'done'),
+        ('valid', 'valid'),
+        ('cancel', 'cancel'),
+
     }
     estate = models.CharField(choices=choice, default='valid', max_length=10, null=False)
     guestnum = models.IntegerField(default=1, null=False)

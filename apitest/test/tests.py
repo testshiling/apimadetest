@@ -64,7 +64,8 @@ def others_pay_order(others_pay_order_info):
 
 
 if __name__ == '__main__':
-    # username = "luoshiling19",
+
+    # username = "luoshiling20",
     # password = "admin12345",
     # email = "15901304866@163.com"
     # register(username, password, email)
@@ -79,23 +80,23 @@ if __name__ == '__main__':
     #              "image_md5":"sfdgwet4husf98fwiuhfsjkdhwh"
     #             }
     # add_lodgeInfo(info_dict)
-    # order_info = {
-    #     "luid":1,
-    #     "guestnum":2,
-    #     "checkinday":"2019-01-03",
-    #     "checkoutday":"2019-01-04"
-    # }
-    # add_order(order_info)
-    # pay_order_info = {
-    #     "order_id": 1,
-    #     "luid": 1
-    # }
-    #pay_order(pay_order_info)
-    others_pay_order_info = {
-         "order_id": 1,
-         "totalprice": 3
+    order_info = {
+        "luid":1,
+        "guestnum":2,
+        "checkinday":"2019-01-03",
+        "checkoutday":"2019-01-04"
     }
-    others_pay_order(others_pay_order_info)
+    add_order(order_info)
+    pay_order_info = {
+        "order_id": 17,
+        "luid": 1
+    }
+    pay_order(pay_order_info)
+    # others_pay_order_info = {
+    #      "order_id": 5,
+    #      "totalprice": 3
+    # }
+    # others_pay_order(others_pay_order_info)
 
 
 
