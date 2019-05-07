@@ -12,7 +12,7 @@ import sys
 import datetime
 import threading
 from apitest.others import others_pay_order_true
-import requests
+
 
 
 # api_demo
