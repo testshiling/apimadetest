@@ -60,6 +60,12 @@ def others_pay_order(others_pay_order_info):
     print(re.text)
 
 
+def order_cancel(cancel_info):
+    url = "http://127.0.0.1:8000/api_cancel_order/"
+    json.dumps(cancel_info)
+    re = requests.post(url, json=cancel_info)
+    print(re.text)
+
 
 
 
@@ -87,16 +93,20 @@ if __name__ == '__main__':
         "checkoutday":"2019-01-04"
     }
     add_order(order_info)
-    pay_order_info = {
-        "order_id": 1,
-        "luid": 1
-    }
-    pay_order(pay_order_info)
+    # pay_order_info = {
+    #     "order_id": 1,
+    #     "luid": 1
+    # }
+    # pay_order(pay_order_info)
     # others_pay_order_info = {
     #      "order_id": 5,
     #      "totalprice": 3
     # }
     # others_pay_order(others_pay_order_info)
+    cancel_info = {
+        "order_id": 10
+    }
+    order_cancel(cancel_info)
 
 
 

@@ -28,5 +28,6 @@ urlpatterns = [
     url(r'^api_pay_order/', pay_order),
     url(r'^api_others_pay_order/', others_pay_order),
     url(r'^api_payback_order/', payback_order),
+    url(r'^api_cancel_order/', cancel_order),
 
 ]

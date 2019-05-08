@@ -338,3 +338,25 @@ def pay_order(request):
             return Response({"status_code": 400, "msg": "订单与房源不匹配"})
 
 
+@csrf_exempt
+@api_view(http_method_names=['POST'])
+@permission_classes((permissions.AllowAny,))
+def cancel_order(request):
+    data = json.loads(request.body)
+    order_id = data['order_id']
+    try:
+        orderinfo = order.objects.filter(id=str(order_id))
+    except Exception:
+        return Response({"status_code": 400, "msg": "订单不存在"})
+    for i in orderinfo:
+        if i.estate == 'done':
+            return Response({"status_code": 400, "msg": "订单已完成，不能取消"})
+        elif i.estate == "valid":
+            orderinfo.update(estate="cancel")
+            return Response({"status_code": 200, "msg": "订单取消成功"})
+        else:
+            return Response({"status_code": 400, "msg": "订单已被取消或订单异常"})
+
+
+
+
