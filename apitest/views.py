@@ -31,6 +31,7 @@ def api_demo(request):
 
     return Response({'data': data})
 
+#test
 
 # 登录接口-post
 @csrf_exempt
