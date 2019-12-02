@@ -12,6 +12,7 @@ import sys
 import datetime
 import threading
 from apitest.others import others_pay_order_true
+import re
 
 
 
@@ -172,6 +173,44 @@ def add_lodgeinfo(request):
     # else:
     #     print("没触发", func_r)
     try:
+        dayprice = info_dict['dayprice']
+    except Exception:
+        return Response({"status_code": 400, "msg": "dayprice必传"})
+    try:
+        minday = info_dict['minday']
+    except Exception:
+        return Response({"status_code": 400, "msg": "minday必传"})
+    try:
+        maxday = info_dict['maxday']
+    except Exception:
+        return Response({"status_code": 400, "msg": "maxday必传"})
+    try:
+        tel = info_dict['tel']
+    except Exception:
+        return Response({"status_code": 400, "msg": "tel必传"})
+    try:
+        address_id = info_dict['address_id']
+    except Exception:
+        return Response({"status_code": 400, "msg": "address_id必传"})
+    try:
+        image_md5 = info_dict['image_md5']
+    except Exception:
+        return Response({"status_code": 400, "msg": "image_md5必传"})
+    if minday >= maxday:
+        return Response({"status_code": 400, "msg": "minday 必须小于 maxday"})
+    if not isinstance(dayprice,int):
+        return Response({"status_code": 400, "msg": "dayprice必须是int类型"})
+    if not isinstance(minday,int):
+        return Response({"status_code": 400, "msg": "minday必须是int类型"})
+    if not isinstance(maxday,int):
+        return Response({"status_code": 400, "msg": "dmaxday必须是int类型"})
+    print(address_id)
+    if not isinstance(address_id,int):
+        return Response({"status_code": 400, "msg": "address_id必须是int类型"})
+    ret = re.match(r"^1[35678]\d{9}$", tel)
+    if not ret:
+        return Response({"status_code": 400, "msg": "手机号格式不正确"})
+    try:
         lodgeunitinfo.objects.create(**info_dict)
         return Response({"status_code": 200, "msg": "房源添加成功"})
     except Exception:
@@ -198,7 +237,14 @@ def create_order(request):
     data = json.loads(request.body)
     #  房源存在校验
     luid = data['luid']
-    daynum = datetime.datetime.strptime(data['checkoutday'], '%Y-%m-%d') - datetime.datetime.strptime(data['checkinday'],'%Y-%m-%d')
+    try:
+        checkinday = datetime.datetime.strptime(data['checkinday'],'%Y-%m-%d')
+        checkoutday = datetime.datetime.strptime(data['checkoutday'], '%Y-%m-%d')
+        daynum = checkoutday - checkinday
+    except Exception:
+        return Response({"status_code": 400, "msg": "时间格式错误"})
+
+
     id_list = []
     for i in lodgeunitinfo.objects.values('id'):
         id_list.append(i['id'])
@@ -206,6 +252,7 @@ def create_order(request):
         return Response({"status_code": 400, "msg": luid + "不存在"})
     elif daynum.days < 1:
         return Response({"status_code": 400, "msg": "入住时间不能晚于离开时间"})
+
     else:
         lodgeinfo = lodgeunitinfo.objects.filter(id=str(luid))
         dayprice = 0
