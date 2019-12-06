@@ -76,6 +76,7 @@ if __name__ == '__main__':
     # email = "15901304866@163.com"
     # register(username, password, email)
     # login(username, password)
+    login1()
     # info_dict = {"dayprice":3,
     #              "estate":"valid",
     #              "minday":1,

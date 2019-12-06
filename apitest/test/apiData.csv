@@ -1,0 +1,3 @@
+apiName,runOrNot,url,get/post,dataType,data,assertion
+login_get,1,api_login_get?,get,/,username=luoshiling&password=admin12345,status_code:200
+login_post,1,api_login_post/,post,json,"{""username"": ""luoshiling"",""password"": ""admin12345""}",status_code:200
